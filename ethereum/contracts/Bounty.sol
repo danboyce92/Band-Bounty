@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.4.17;
 
+import './LinkOracle.sol';
 
-contract BountyFactory {
+contract BountyFactory is LinkOracle {
     address[] public deployedBounties;
 
     function createBounty(uint minimum) public {
@@ -31,7 +32,7 @@ contract Bounty {
     Request[] public requests; 
     address public manager;
     uint public minimumContribution;
-    mapping(address => bool) public approvers;
+    mapping(address => uint256) public approvers;
     uint public approversCount;
 
     modifier restricted() {
@@ -39,7 +40,7 @@ contract Bounty {
         _;
     }
 
-    function Bounty(uint minimum, address creator) public {
+    function Bounty(uint minimum, address creator, string band, string city) public {
         manager = creator;
         minimumContribution = minimum;
     }
@@ -47,8 +48,10 @@ contract Bounty {
     function contribute() public payable {
         require(msg.value > minimumContribution);
         
-        approvers[msg.sender] = true;
+        if(approvers[msg.sender] == 0) {
         approversCount++;
+        }
+        approvers[msg.sender] = 1;
 
     }
 
